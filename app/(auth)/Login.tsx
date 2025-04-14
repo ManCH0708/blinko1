@@ -5,31 +5,82 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  Image,
   Dimensions,
+  ActivityIndicator,
+  Platform,
+  Alert
 } from 'react-native';
 import { router } from 'expo-router';
 
 const { width } = Dimensions.get('window');
 
+type LoginResponse = {
+  success: boolean;
+  message: string;
+};
+// utils/apiConfig.ts
+export const API_CONFIG = {
+  baseUrl: Platform.select({
+    ios: 'http://192.168.11.106:8080', // Your local IP
+    android: 'http://10.0.2.2:8080',
+    default: 'http://localhost:8080'
+  }),
+  endpoints: {
+    login: '/login'
+  }
+};
+
 export default function LoginScreen() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [errorMessage, setErrorMessage] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const handleLogin = () => {
-    const validEmail = 'user@example.com';
-    const validPassword = 'password123';
 
-    if (email === validEmail && password === validPassword) {
-      setErrorMessage('');
-      router.push('/home/Home');
-    } else {
-      setErrorMessage('Invalid email or password.');
+
+  const handleLogin = async () => {
+    setIsLoading(true);
+    
+    try {
+      const response = await fetch(`${API_CONFIG.baseUrl}/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: email,
+          password: password
+        })
+      });
+  
+      // First check if response is JSON
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const text = await response.text();
+        throw new Error(`Expected JSON but got: ${text.substring(0, 50)}...`);
+      }
+  
+      const data = await response.json();
+  
+      if (!response.ok) {
+        throw new Error(data.message || 'Login failed');
+      }
+  
+      router.replace('/home/Home');
+    } catch (error: any) {
+      console.error('Full error:', error);
+      Alert.alert(
+        'Login Error',
+        error.message.includes('Expected JSON') 
+          ? 'Server returned invalid response'
+          : error.message || 'Login failed'
+      );
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleSignUp = () => {
+  const handleSignUp = (): void => {
     router.push('/(auth)/Register');
   };
 
@@ -46,7 +97,8 @@ export default function LoginScreen() {
         placeholderTextColor="#aaa"
         keyboardType="email-address"
         value={email}
-        onChangeText={setEmail}
+        onChangeText={(text: string) => setEmail(text)}
+        autoCapitalize="none"
       />
       <TextInput
         style={styles.input}
@@ -54,13 +106,21 @@ export default function LoginScreen() {
         placeholderTextColor="#aaa"
         secureTextEntry
         value={password}
-        onChangeText={setPassword}
+        onChangeText={(text: string) => setPassword(text)}
       />
 
       {errorMessage ? <Text style={styles.error}>{errorMessage}</Text> : null}
 
-      <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-        <Text style={styles.loginButtonText}>Login</Text>
+      <TouchableOpacity 
+        style={styles.loginButton} 
+        onPress={handleLogin}
+        disabled={isLoading}
+      >
+        {isLoading ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text style={styles.loginButtonText}>Login</Text>
+        )}
       </TouchableOpacity>
 
       <Text style={styles.or}>or sign in using social media</Text>
@@ -79,7 +139,7 @@ export default function LoginScreen() {
 
       <TouchableOpacity onPress={handleSignUp}>
         <Text style={styles.footer}>
-          Don’t have an account? <Text style={styles.signUpLink}>Register now</Text>
+          Don't have an account? <Text style={styles.signUpLink}>Register now</Text>
         </Text>
       </TouchableOpacity>
     </View>
