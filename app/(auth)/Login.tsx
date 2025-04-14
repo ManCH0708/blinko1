@@ -5,7 +5,6 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  Image,
   Dimensions,
   Alert,
   Platform,
@@ -99,7 +98,7 @@ export default function LoginScreen() {
     }
   };
 
-  const handleSignUp = () => {
+  const handleSignUp = (): void => {
     router.push('/(auth)/Register');
   };
 
@@ -139,7 +138,8 @@ export default function LoginScreen() {
         placeholderTextColor="rgba(255, 255, 255, 0.7)"
         keyboardType="email-address"
         value={email}
-        onChangeText={setEmail}
+        onChangeText={(text: string) => setEmail(text)}
+        autoCapitalize="none"
       />
       <TextInput
         style={styles.input}
@@ -147,7 +147,7 @@ export default function LoginScreen() {
         placeholderTextColor="rgba(255, 255, 255, 0.7)"
         secureTextEntry
         value={password}
-        onChangeText={setPassword}
+        onChangeText={(text: string) => setPassword(text)}
       />
 
       {/* Message d'erreur */}
