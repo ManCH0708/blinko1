@@ -1,121 +1,121 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, ActivityIndicator, Alert, Platform } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Dimensions,
+  ActivityIndicator,
+  Alert,
+  Platform,
+  ImageBackground,
+  StatusBar,
+} from 'react-native';
 import { router } from 'expo-router';
 
-// Move API config to a separate file (utils/apiConfig.ts)
+const { height } = Dimensions.get('window');
+
 const API_CONFIG = {
   baseUrl: Platform.select({
-    ios: 'http://192.168.11.106:8080', // Your local IP
+    ios: 'http://192.168.2.8:8080',
     android: 'http://10.0.2.2:8080',
-    default: 'http://localhost:8080'
+    default: 'http://localhost:8080',
   }),
   endpoints: {
-    register: '/register'
-  }
+    register: '/register',
+  },
 };
 
 export default function RegisterScreen() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleRegister = async () => {
-    // Input validation
-    if (!name.trim() || !email.trim() || !password.trim()) {
+    if (!name || !email || !password || !confirmPassword) {
       Alert.alert('Error', 'All fields are required');
       return;
     }
-  
+    if (password !== confirmPassword) {
+      Alert.alert('Error', 'Passwords do not match');
+      return;
+    }
     setIsLoading(true);
-  
     try {
       const response = await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.endpoints.register}`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username: name.trim(),
-          email: email.trim(),
-          password: password
-        })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: name, email, password }),
       });
-  
-      const responseText = await response.text();
-      const data = responseText ? JSON.parse(responseText) : {};
-  
-      if (!response.ok) {
-        throw new Error(data.message || 'Registration failed. Please try again.');
-      }
-  
+      const resText = await response.text();
+      const data = resText ? JSON.parse(resText) : {};
+      if (!response.ok) throw new Error(data.message || 'Registration failed');
       Alert.alert('Success', 'Account created!', [
-        { text: 'OK', onPress: () => router.replace('/(auth)/Login') }
+        { text: 'OK', onPress: () => router.replace('/(auth)/Login') },
       ]);
     } catch (error: any) {
-      console.error('Full error:', error);
-      Alert.alert(
-        'Registration Failed',
-        error.message.includes('JSON Parse error') 
-          ? 'Server returned invalid data'
-          : error.message
-      );
+      Alert.alert('Error', error.message);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleLogin = () => {
-    router.push('/(auth)/Login');
-  };
-
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Create Account</Text>
-      
-      <TextInput
-        style={styles.input}
-        placeholder="Full Name"
-        value={name}
-        onChangeText={setName}
-        autoCapitalize="words"
-      />
-      
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        keyboardType="email-address"
-        autoCapitalize="none"
-        autoCorrect={false}
-        value={email}
-        onChangeText={setEmail}
-      />
-      
-      <TextInput
-        style={styles.input}
-        placeholder="Password (min 8 characters)"
-        secureTextEntry
-        value={password}
-        onChangeText={setPassword}
-      />
-      
-      <TouchableOpacity 
-        style={[styles.button, isLoading && styles.disabledButton]} 
-        onPress={handleRegister}
-        disabled={isLoading}
+      <StatusBar translucent backgroundColor="transparent" barStyle="dark-content" />
+      <ImageBackground
+        source={require('@/assets/images/background.jpg')}
+        style={styles.background}
+        imageStyle={styles.rotatedImage} // rotate image
+        resizeMode="cover"
       >
-        {isLoading ? (
-          <ActivityIndicator color="#fff" />
-        ) : (
-          <Text style={styles.buttonText}>Sign Up</Text>
-        )}
-      </TouchableOpacity>
-      
-      <TouchableOpacity onPress={handleLogin} style={styles.loginButton}>
-        <Text style={styles.loginText}>
-          Already have an account? <Text style={styles.loginLink}>Login</Text>
-        </Text>
-      </TouchableOpacity>
+        <View style={styles.topContent}>
+          <TouchableOpacity onPress={() => router.back()}>
+            <Text style={styles.backText}>← Back</Text>
+          </TouchableOpacity>
+          <Text style={styles.title}>Sign Up</Text>
+        </View>
+
+        <View style={styles.formContainer}>
+          <TextInput
+            placeholder="Email or phone number"
+            placeholderTextColor="#ccc"
+            style={styles.input}
+            value={email}
+            onChangeText={setEmail}
+          />
+          <TextInput
+            placeholder="Password"
+            placeholderTextColor="#ccc"
+            secureTextEntry
+            style={styles.input}
+            value={password}
+            onChangeText={setPassword}
+          />
+          <TextInput
+            placeholder="Confirm password"
+            placeholderTextColor="#ccc"
+            secureTextEntry
+            style={styles.input}
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+          />
+          <TextInput
+            placeholder="Name or pseudo"
+            placeholderTextColor="#ccc"
+            style={styles.input}
+            value={name}
+            onChangeText={setName}
+          />
+
+          <TouchableOpacity style={styles.button} onPress={handleRegister} disabled={isLoading}>
+            {isLoading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Sign Up</Text>}
+          </TouchableOpacity>
+        </View>
+      </ImageBackground>
     </View>
   );
 }
@@ -123,52 +123,54 @@ export default function RegisterScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  background: {
+    flex: 1,
+    justifyContent: 'space-between',
+  },
+  rotatedImage: {
+    transform: [{ rotate: '180deg' }],
+  },
+  topContent: {
+    paddingTop: 60,
     paddingHorizontal: 30,
-    justifyContent: 'center',
-    padding: 20,
-    backgroundColor: '#f8f9fa',
+  },
+  backText: {
+    fontSize: 16,
+    color: '#1E1E2C',
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    marginBottom: 30,
+    color: '#1E1E2C',
     textAlign: 'center',
-    color: '#333',
+    marginTop: 10,
+  },
+  formContainer: {
+    backgroundColor: 'transparent',
+    paddingHorizontal: 30,
+    paddingBottom: 60,
   },
   input: {
-    height: 50,
-    borderColor: '#ddd',
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 15,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    color: '#fff',
+    padding: 15,
+    borderRadius: 25,
     marginBottom: 15,
-    backgroundColor: '#fff',
-    fontSize: 16,
+    fontSize: 15,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.5)',
   },
   button: {
-    backgroundColor: '#7A50D4',
+    backgroundColor: '#885aa0',
     padding: 15,
-    borderRadius: 8,
+    borderRadius: 25,
     alignItems: 'center',
     marginTop: 10,
   },
-  disabledButton: {
-    opacity: 0.7,
-  },
   buttonText: {
     color: '#fff',
-    fontWeight: 'bold',
+    fontWeight: '600',
     fontSize: 16,
-  },
-  loginButton: {
-    marginTop: 20,
-  },
-  loginText: {
-    textAlign: 'center',
-    color: '#666',
-  },
-  loginLink: {
-    color: '#7A50D4',
-    fontWeight: 'bold',
   },
 });

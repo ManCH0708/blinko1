@@ -7,16 +7,23 @@ import {
   StyleSheet,
   Dimensions,
   Alert,
+  ImageBackground,
+  Image,
+  ActivityIndicator,
+  StatusBar,
   Platform,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import Svg, { Path } from 'react-native-svg';
 import * as LocalAuthentication from 'expo-local-authentication';
 import { router } from 'expo-router';
-
+import { LinearGradient } from 'expo-linear-gradient';
+import {
+  useFonts,
+  Poppins_600SemiBold,
+} 
+from '@expo-google-fonts/poppins';
 export const API_CONFIG = {
   baseUrl: Platform.select({
-    ios: 'http://192.168.11.106:8080', // Your local IP
+    ios: 'http://192.168.2.8:8080', // Your local IP
     android: 'http://10.0.2.2:8080',
     default: 'http://localhost:8080'
   }),
@@ -25,13 +32,18 @@ export const API_CONFIG = {
   }
 };
 
+
 const { width, height } = Dimensions.get('window');
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
   const [isFaceIdAvailable, setIsFaceIdAvailable] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const [fontsLoaded] = useFonts({
+    Poppins_600SemiBold,
+  });
 
   useEffect(() => {
     checkDeviceSupport();
@@ -98,131 +110,149 @@ export default function LoginScreen() {
     }
   };
 
-  const handleSignUp = (): void => {
-    router.push('/(auth)/Register');
-  };
+  if (!fontsLoaded) return null;
 
   return (
-    <LinearGradient
-      colors={['#6A11CB', '#2575FC']}
-      style={styles.container}
-    >
-      {/* Section supérieure avec la courbe blanche */}
-      <View style={styles.topSection}>
-        <Svg
-          height="50%"
-          width="100%"
-          viewBox="0 0 1440 320"
-          style={styles.curve}
-        >
-          <Path
-            fill="#fff"
-            d="M0,96L48,112C96,128,192,160,288,186.7C384,213,480,235,576,213.3C672,192,768,128,864,112C960,96,1056,128,1152,160C1248,192,1344,224,1392,240L1440,256L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z"
+    <View style={styles.container}>
+      <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
+
+      <ImageBackground
+        source={require('@/assets/images/background.jpg')}
+        style={styles.background}
+        resizeMode="cover"
+      >
+        <View style={styles.topContent}>
+          <Text style={styles.title}>Login</Text>
+
+          <TextInput
+            style={styles.input}
+            placeholder="Email"
+            placeholderTextColor="rgba(255,255,255,0.7)"
+            value={email}
+            onChangeText={setEmail}
           />
-        </Svg>
-        <Image
-          source={require('../../assets/images/Email-capture-amico.png')} // Remplacez par votre image
-          style={styles.image}
-          resizeMode="contain"
-        />
-      </View>
+          <TextInput
+            style={styles.input}
+            placeholder="Password"
+            placeholderTextColor="rgba(255,255,255,0.7)"
+            secureTextEntry
+            value={password}
+            onChangeText={setPassword}
+          />
 
-      {/* Titre et sous-titre */}
-      <Text style={styles.title}>Welcome Back</Text>
-      <Text style={styles.subtitle}>Login to your account</Text>
+          {isFaceIdAvailable && (
+            <TouchableOpacity style={styles.faceIdButton} onPress={handleFaceIdLogin}>
+              <Text style={styles.faceIdButtonText}>Login with Face ID</Text>
+            </TouchableOpacity>
+          )}
 
-      {/* Champs de saisie */}
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        placeholderTextColor="rgba(255, 255, 255, 0.7)"
-        keyboardType="email-address"
-        value={email}
-        onChangeText={(text: string) => setEmail(text)}
-        autoCapitalize="none"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        placeholderTextColor="rgba(255, 255, 255, 0.7)"
-        secureTextEntry
-        value={password}
-        onChangeText={(text: string) => setPassword(text)}
-      />
+          {/* Login button */}
+          <LinearGradient
+           colors={['#dbd2f0', '#dbd2f0']}
 
-      {/* Message d'erreur */}
-      {errorMessage ? <Text style={styles.error}>{errorMessage}</Text> : null}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.loginButton}
+          >
+            <TouchableOpacity onPress={handleLogin} style={{ width: '100%', alignItems: 'center' }}>
+              {isLoading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.loginButtonText}>Login</Text>
+              )}
+            </TouchableOpacity>
+          </LinearGradient>
 
-      {/* Bouton de connexion */}
-      <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-        <Text style={styles.loginButtonText}>LOGIN</Text>
-      </TouchableOpacity>
+          {/* Forgot password */}
+          <TouchableOpacity onPress={() => Alert.alert('Redirect', 'To Forgot Password')}>
+            <Text style={styles.forgotPassword}>Forgot password?</Text>
+          </TouchableOpacity>
+        </View>
 
-      {/* Bouton Face ID */}
-      {isFaceIdAvailable && (
-        <TouchableOpacity style={styles.faceIdButton} onPress={handleFaceIdLogin}>
-          <Text style={styles.faceIdButtonText}>Login with Face ID</Text>
-        </TouchableOpacity>
-      )}
+        {/* Social login + Sign up */}
+        <View style={styles.bottomSection}>
+          <Text style={styles.socialText}>Or login with</Text>
 
-      {/* Lien pour s'inscrire */}
-      <TouchableOpacity onPress={handleSignUp}>
-        <Text style={styles.footer}>
-          Don’t have an account? <Text style={styles.signUpLink}>Sign Up</Text>
-        </Text>
-      </TouchableOpacity>
-    </LinearGradient>
+          <View style={styles.socialRow}>
+            <Image source={require('@/assets/icons/facebook.png')} style={styles.icon} />
+            <Image source={require('@/assets/icons/google.png')} style={styles.icon} />
+            <Image source={require('@/assets/icons/instagram.png')} style={styles.icon} />
+          </View>
+
+          <TouchableOpacity onPress={() => router.push('/(auth)/Register')}>
+            <Text style={styles.registerText}>
+              Don’t have an account? <Text style={styles.registerLink}>Sign Up</Text>
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </ImageBackground>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
-  topSection: {
-    width: '100%',
-    alignItems: 'center',
-    marginBottom: 20,
+  background: {
+    flex: 1,
+    justifyContent: 'space-between',
   },
-  curve: {
-    position: 'absolute',
-    top: 0,
-  },
-  image: {
-    width: width * 0.6,
-    height: height * 0.3,
-    marginTop: 50,
+  topContent: {
+    paddingTop: 100,
+    paddingHorizontal: 30,
   },
   title: {
-    fontSize: 28,
-    fontWeight: 'bold',
+    fontSize: 32,
     color: '#fff',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: 'rgba(255, 255, 255, 0.8)',
-    marginBottom: 24,
+    textAlign: 'center',
+    marginBottom: 25,
+    fontFamily: 'Poppins_600SemiBold',
+    letterSpacing: 1.2,
   },
   input: {
-    width: '85%',
-    backgroundColor: 'rgba(255, 255, 255, 0.2)', // Transparent background
+    backgroundColor: 'rgba(255,255,255,0.1)',
     borderRadius: 25,
     padding: 14,
     fontSize: 16,
-    marginBottom: 14,
+    marginBottom: 20,
     color: '#fff',
+    borderWidth: 1.2,
+    borderColor: 'rgba(255,255,255,0.7)',
+  },
+  faceIdButton: {
+    marginTop: 10,
+    borderColor: '#fff',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.5)',
+    borderRadius: 25,
+    padding: 12,
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  faceIdButtonText: {
+    color: '#fff',
+    fontSize: 16,
+  },
+  forgotPassword: {
+    marginTop: 10,
+    color: '#fff',
+    fontSize: 14,
+    textAlign: 'center',
+    textDecorationLine: 'underline',
+  },
+  bottomSection: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 60,
+    borderTopRightRadius: 60,
+    paddingTop: 30,
+    paddingBottom: 50,
+    paddingHorizontal: 30,
+    alignItems: 'center',
   },
   loginButton: {
-    width: '85%',
-    backgroundColor: '#4A90E2',
     padding: 14,
+    width: '100%',
     borderRadius: 25,
-    alignItems: 'center',
     marginTop: 10,
   },
   loginButtonText: {
@@ -230,36 +260,30 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16,
   },
-  faceIdButton: {
-    width: '85%',
-    backgroundColor: '#ffffff44', // Transparent white
-    padding: 14,
-    borderRadius: 25,
-    alignItems: 'center',
-    marginTop: 12,
-    borderWidth: 1,
-    borderColor: '#fff',
-  },
-  faceIdButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-  footer: {
+  socialText: {
     fontSize: 14,
-    color: '#fff',
-    marginTop: 20,
+    color: '#444',
+    marginBottom: 10,
   },
-  signUpLink: {
-    color: '#FFD700',
+  socialRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 15,
+    marginTop: 10,
+  },
+  icon: {
+    width: 42,
+    height: 42,
+    resizeMode: 'contain',
+    marginHorizontal: 10,
+  },
+  registerText: {
+    fontSize: 14,
+    color: '#444',
+    marginTop: 30,
+  },
+  registerLink: {
+    color: '#8E72DC',
     fontWeight: 'bold',
-  },
-  error: {
-    color: 'red',
-    marginBottom: 8,
   },
 });
-function setIsLoading(arg0: boolean) {
-  throw new Error('Function not implemented.');
-}
-
