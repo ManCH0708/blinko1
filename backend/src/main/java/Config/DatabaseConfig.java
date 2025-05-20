@@ -17,10 +17,14 @@ public class DatabaseConfig {
         config.setProperty("hibernate.connection.username", "blinkouser");
         config.setProperty("hibernate.connection.password", "yourpassword");
         config.setProperty("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
-        config.setProperty("hibernate.hbm2ddl.auto", "update"); // Changed from "update" to "create" temporarily
+        config.setProperty("hibernate.hbm2ddl.auto", "update"); 
         
         // Add all entity classes
         config.addAnnotatedClass(Entity.User.class);
+        config.addAnnotatedClass(Entity.ScreenshotAnalysis.class);
+        config.addAnnotatedClass(Entity.Profile.class);
+
+
         
         sessionFactory = config.buildSessionFactory();
     }

@@ -31,22 +31,23 @@ export default function WelcomeScreen() {
           />
 
           {/* Welcome Text */}
-          <Text style={styles.title}>Welcome to Blinko</Text>
-          <Text style={styles.paragraph}>
-            Blinko helps you effortlessly capture screenshots and audio moments from your screen. Organize, save, and explore everything you’ve seen or heard — smarter and faster.
-          </Text>
+          <Text style={styles.title}>Bienvenue sur Blinko</Text>
+<Text style={styles.paragraph}>
+  Blinko vous aide à capturer facilement des captures d’écran et des moments audio depuis votre écran. Organisez, enregistrez et explorez tout ce que vous avez vu ou entendu — de manière plus intelligente et plus rapide.
+</Text>
 
-          {/* Buttons */}
-          <TouchableOpacity style={styles.button} onPress={() => router.push('/(auth)/Login')}>
-            <Text style={styles.buttonText}>Login</Text>
-          </TouchableOpacity>
+{/* Boutons */}
+<TouchableOpacity style={styles.button} onPress={() => router.push('/(auth)/Login')}>
+  <Text style={styles.buttonText}>Connexion</Text>
+</TouchableOpacity>
 
-          <TouchableOpacity
-            style={[styles.button, styles.secondaryButton]}
-            onPress={() => router.push('/(auth)/Register')}
-          >
-            <Text style={styles.buttonText}>Register</Text>
-          </TouchableOpacity>
+<TouchableOpacity
+  style={[styles.button, styles.secondaryButton]}
+  onPress={() => router.push('/pages/profil')}
+>
+  <Text style={styles.buttonText}>Créer un compte</Text>
+</TouchableOpacity>
+
         </View>
       </ImageBackground>
     </View>

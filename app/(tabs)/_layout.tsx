@@ -1,4 +1,4 @@
-import { Tabs } from 'expo-router';
+import { Stack, Tabs } from 'expo-router';
 import React from 'react';
 import { Platform } from 'react-native';
 
@@ -40,6 +40,9 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
         }}
       />
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="capturephoto" options={{ headerShown: false }} />
+      </Stack>
     </Tabs>
   );
 }

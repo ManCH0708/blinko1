@@ -1,9 +1,11 @@
-import org.apache.catalina.startup.Tomcat;
 import org.apache.catalina.Context;
+import org.apache.catalina.startup.Tomcat;
+
+import Config.DatabaseConfig;
 import Servlets.LoginServlet;
 import Servlets.RegisterServlet;
-import Config.DatabaseConfig;
-import java.io.File;
+import Servlets.ScreenshotAnalysisServlet;
+import Servlets.UserProfileServlet;
 
 public class ServerMain {
     public static void main(String[] args) throws Exception {
@@ -15,17 +17,20 @@ public class ServerMain {
         tomcat.setPort(8080);
         
         // Configure context
-        File webappDir = new File("backend/web");
-        Context context = tomcat.addWebapp("", webappDir.getAbsolutePath());
+        Context context = tomcat.addContext("", null);
         
         // Register servlets
         Tomcat.addServlet(context, "loginServlet", new LoginServlet());
         Tomcat.addServlet(context, "registerServlet", new RegisterServlet());
-        
+        Tomcat.addServlet(context, "analyzeServlet", new ScreenshotAnalysisServlet());
+        Tomcat.addServlet(context, "profileServlet", new UserProfileServlet());
+
+
         // Map servlets to endpoints
         context.addServletMappingDecoded("/login", "loginServlet");
         context.addServletMappingDecoded("/register", "registerServlet");
-        
+        context.addServletMappingDecoded("/analyze", "analyzeServlet");
+        context.addServletMappingDecoded("/profile", "profileServlet");
         // Start server
         tomcat.getConnector();
         tomcat.start();
@@ -40,3 +45,4 @@ public class ServerMain {
         tomcat.getServer().await();
     }
 }
+

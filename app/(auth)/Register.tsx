@@ -18,7 +18,7 @@ const { height } = Dimensions.get('window');
 
 const API_CONFIG = {
   baseUrl: Platform.select({
-    ios: 'http://192.168.2.8:8080',
+    ios: 'http://169.254.2.253:8080',
     android: 'http://10.0.2.2:8080',
     default: 'http://localhost:8080',
   }),
@@ -73,48 +73,53 @@ export default function RegisterScreen() {
         resizeMode="cover"
       >
         <View style={styles.topContent}>
-          <TouchableOpacity onPress={() => router.back()}>
-            <Text style={styles.backText}>← Back</Text>
-          </TouchableOpacity>
-          <Text style={styles.title}>Sign Up</Text>
-        </View>
+  <TouchableOpacity onPress={() => router.back()}>
+    <Text style={styles.backText}>← Retour</Text>
+  </TouchableOpacity>
+  <Text style={styles.title}>Créer un compte</Text>
+</View>
 
-        <View style={styles.formContainer}>
-          <TextInput
-            placeholder="Email or phone number"
-            placeholderTextColor="#ccc"
-            style={styles.input}
-            value={email}
-            onChangeText={setEmail}
-          />
-          <TextInput
-            placeholder="Password"
-            placeholderTextColor="#ccc"
-            secureTextEntry
-            style={styles.input}
-            value={password}
-            onChangeText={setPassword}
-          />
-          <TextInput
-            placeholder="Confirm password"
-            placeholderTextColor="#ccc"
-            secureTextEntry
-            style={styles.input}
-            value={confirmPassword}
-            onChangeText={setConfirmPassword}
-          />
-          <TextInput
-            placeholder="Name or pseudo"
-            placeholderTextColor="#ccc"
-            style={styles.input}
-            value={name}
-            onChangeText={setName}
-          />
+<View style={styles.formContainer}>
+  <TextInput
+    placeholder="Email ou numéro de téléphone"
+    placeholderTextColor="#ccc"
+    style={styles.input}
+    value={email}
+    onChangeText={setEmail}
+  />
+  <TextInput
+    placeholder="Mot de passe"
+    placeholderTextColor="#ccc"
+    secureTextEntry
+    style={styles.input}
+    value={password}
+    onChangeText={setPassword}
+  />
+  <TextInput
+    placeholder="Confirmer le mot de passe"
+    placeholderTextColor="#ccc"
+    secureTextEntry
+    style={styles.input}
+    value={confirmPassword}
+    onChangeText={setConfirmPassword}
+  />
+  <TextInput
+    placeholder="Nom ou pseudo"
+    placeholderTextColor="#ccc"
+    style={styles.input}
+    value={name}
+    onChangeText={setName}
+  />
 
-          <TouchableOpacity style={styles.button} onPress={handleRegister} disabled={isLoading}>
-            {isLoading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Sign Up</Text>}
-          </TouchableOpacity>
-        </View>
+  <TouchableOpacity style={styles.button} onPress={handleRegister} disabled={isLoading}>
+    {isLoading ? (
+      <ActivityIndicator color="#fff" />
+    ) : (
+      <Text style={styles.buttonText}>Créer un compte</Text>
+    )}
+  </TouchableOpacity>
+</View>
+
       </ImageBackground>
     </View>
   );

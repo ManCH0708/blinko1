@@ -15,6 +15,7 @@ import org.json.JSONObject;
 import org.mindrot.jbcrypt.BCrypt;
 
 import Config.DatabaseConfig;
+import Entity.Profile;
 import Entity.User;
 
 @WebServlet("/register")
@@ -62,6 +63,15 @@ public class RegisterServlet extends HttpServlet {
             newUser.setEmail(json.getString("email"));
             
             session.persist(newUser);
+
+            // Create and persist profile linked to the new user
+            Profile profile = new Profile();
+            profile.setUser(newUser);
+            profile.setPhone("");
+            profile.setBirthday(null);
+            profile.setAdresse("");
+            session.persist(profile);
+
             session.getTransaction().commit();
             
             out.print("{\"success\":true,\"message\":\"User registered successfully\"}");
